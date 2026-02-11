@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Amazon Price Checker</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div id="root">
+    <div class="header">
+      <div class="header-content">
+        <div class="logo">
+          <div class="logo-icon">📦</div>
+          <div class="logo-text">
+            <h1>Amazon Price Checker</h1>
+            <p>Bulk product analysis tool</p>
+          </div>
+        </div>
+        <div class="header-info">
+          <div class="current-date">
+            <span class="date-icon">📅</span>
+            <span id="current-date">Loading...</span>
+          </div>
+          <div class="limit-info">
+            <span>📊 Up to 1,000 products</span>
+          </div>
+        </div>
+      </div>
+      <div class="developer-credit">
+        <span class="credit-text">Developed by <strong>Jawad x Bader</strong></span>
+      </div>
+    </div>
+
+    <main class="main-content">
+      <div class="url-input-section">
+        <div class="section-header">
+          <span class="icon">📋</span>
+          <h2>Product Data Input</h2>
+        </div>
+        
+        <div class="input-tabs">
+          <button id="tab-simple" class="tab-button active">Simple Input</button>
+          <button id="tab-spreadsheet" class="tab-button">Spreadsheet Mode</button>
+        </div>
+
+        <!-- Simple Input Mode -->
+        <div id="simple-input" class="input-mode">
+          <div class="input-container">
+            <label for="urls">Paste Amazon URLs (one per line)</label>
+            <textarea
+              id="urls"
+              placeholder="https://amazon.com/dp/B08N5WRWNW&#10;https://amazon.co.uk/dp/B08N5WRWNW&#10;..."
+              rows="8"
+            ></textarea>
+          </div>
+        </div>
+
+        <!-- Spreadsheet Input Mode -->
+        <div id="spreadsheet-input" class="input-mode hidden">
+          <div class="spreadsheet-container">
+            <div class="spreadsheet-header">
+              <div class="spreadsheet-instructions">
+                <p>📝 Enter data in two columns: <strong>Amazon URL</strong> and <strong>Your Saved Price</strong></p>
+                <p>💡 Use Tab to move between cells, Enter for new row, or <strong>paste multiple rows at once</strong></p>
+              </div>
+            </div>
+            
+            <div class="spreadsheet-table-container">
+              <table id="spreadsheet-table" class="spreadsheet-table">
+                <thead>
+                  <tr>
+                    <th class="row-number">#</th>
+                    <th class="url-column">Amazon URL</th>
+                    <th class="price-column">Your Saved Price</th>
+                    <th class="actions-column">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="spreadsheet-tbody">
+                  <!-- Rows will be generated dynamically -->
+                </tbody>
+              </table>
+            </div>
+            
+            <div class="spreadsheet-controls">
+              <button id="add-row" class="action-button">
+                <span class="button-icon">➕</span>
+                Add Row
+              </button>
+              <button id="clear-all" class="action-button">
+                <span class="button-icon">🗑️</span>
+                Clear All
+              </button>
+              <button id="import-csv" class="action-button">
+                <span class="button-icon">📁</span>
+                Import CSV
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div id="validation-message" class="validation-message hidden"></div>
+
+        <div class="input-footer">
+          <div class="supported-sites">
+            Supports: amazon.com, amazon.co.uk, amazon.de, amazon.fr, amazon.it, amazon.es, amazon.ca, amazon.com.au
+          </div>
+          <button id="start-analysis" class="start-button">
+            <span class="button-icon">📤</span>
+            Start Analysis
+          </button>
+        </div>
+      </div>
+
+      <div id="progress-section" class="progress-section hidden">
+        <div class="section-header">
+          <h3>Processing Progress</h3>
+          <div class="progress-controls">
+            <button id="pause-resume" class="action-button">
+              <span class="button-icon">⏸️</span>
+              Pause
+            </button>
+            <div id="progress-count" class="progress-count">0 of 0</div>
+          </div>
+        </div>
+
+        <div class="progress-bar-container">
+          <div class="progress-info">
+            <span>Progress</span>
+            <span id="progress-percentage">0%</span>
+          </div>
+          <div class="progress-bar">
+            <div id="progress-fill" class="progress-fill"></div>
+          </div>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-item processed">
+            <span class="stat-icon">⏱️</span>
+            <div class="stat-content">
+              <div id="stat-processed" class="stat-number">0</div>
+              <div class="stat-label">Processed</div>
+            </div>
+          </div>
+          <div class="stat-item success">
+            <span class="stat-icon">✅</span>
+            <div class="stat-content">
+              <div id="stat-success" class="stat-number">0</div>
+              <div class="stat-label">Success</div>
+            </div>
+          </div>
+          <div class="stat-item failed">
+            <span class="stat-icon">❌</span>
+            <div class="stat-content">
+              <div id="stat-failed" class="stat-number">0</div>
+              <div class="stat-label">Failed</div>
+            </div>
+          </div>
+          <div class="stat-item blocked">
+            <span class="stat-icon">🛡️</span>
+            <div class="stat-content">
+              <div id="stat-blocked" class="stat-number">0</div>
+              <div class="stat-label">Blocked</div>
+            </div>
+          </div>
+        </div>
+
+        <div id="processing-status" class="processing-status hidden">
+          <div class="spinner"></div>
+          <span>Processing products...</span>
+        </div>
+      </div>
+
+      <div id="results-section" class="results-section hidden">
+        <div class="results-header">
+          <h3>Results</h3>
+          <div class="results-actions">
+            <button id="copy-results" class="action-button">
+              <span class="button-icon">📋</span>
+              Copy
+            </button>
+            <button id="export-csv" class="action-button primary">
+              <span class="button-icon">💾</span>
+              Export CSV
+            </button>
+            <button id="open-new-tab" class="action-button">
+              <span class="button-icon">🔗</span>
+              Open in New Tab
+            </button>
+          </div>
+        </div>
+
+        <!-- Enhanced Statistics -->
+        <div class="enhanced-stats">
+          <div class="enhanced-stats-grid">
+            <button id="stat-out-of-stock" class="enhanced-stat-item out-of-stock">
+              <span class="enhanced-stat-icon">❌</span>
+              <div class="enhanced-stat-content">
+                <div class="enhanced-stat-number">0</div>
+                <div class="enhanced-stat-label">Out of Stock</div>
+              </div>
+            </button>
+            <button id="stat-late-delivery" class="enhanced-stat-item late-delivery">
+              <span class="enhanced-stat-icon">🚚</span>
+              <div class="enhanced-stat-content">
+                <div class="enhanced-stat-number">0</div>
+                <div class="enhanced-stat-label">Late Delivery (10+ days)</div>
+              </div>
+            </button>
+            <button id="stat-price-increased" class="enhanced-stat-item price-increased">
+              <span class="enhanced-stat-icon">📈</span>
+              <div class="enhanced-stat-content">
+                <div class="enhanced-stat-number">0</div>
+                <div class="enhanced-stat-label">Price Increased (15%+)</div>
+              </div>
+            </button>
+            <button id="stat-low-stock" class="enhanced-stat-item low-stock">
+              <span class="enhanced-stat-icon">⚠️</span>
+              <div class="enhanced-stat-content">
+                <div class="enhanced-stat-number">0</div>
+                <div class="enhanced-stat-label">Low Stock (<20)</div>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        <div class="results-table-container">
+          <table id="results-table" class="results-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Product URL</th>
+                <th>Your Price</th>
+                <th>Current Price</th>
+                <th>Price Change</th>
+                <th>Availability</th>
+                <th>Delivery Date</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="results-tbody">
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="info-panel">
+        <div class="section-header">
+          <span class="icon">ℹ️</span>
+          <h3>How It Works</h3>
+        </div>
+        
+        <div class="info-items">
+          <div class="info-item">
+            <span class="info-icon">💾</span>
+            <div class="info-content">
+              <h4>Progress Persistence</h4>
+              <p>Your progress is automatically saved. You can close the popup and reopen it without losing data.</p>
+            </div>
+          </div>
+          
+          <div class="info-item">
+            <span class="info-icon">📊</span>
+            <div class="info-content">
+              <h4>Smart Highlighting</h4>
+              <p>Red: Out of stock, 15%+ price increase, 10+ days delivery. Yellow: Low stock. Green: 15%+ price decrease.</p>
+            </div>
+          </div>
+          
+          <div class="info-item">
+            <span class="info-icon">🚚</span>
+            <div class="info-content">
+              <h4>Delivery Tracking</h4>
+              <p>Automatically calculates delivery delays based on current date and highlights late deliveries.</p>
+            </div>
+          </div>
+          
+          <div class="info-item">
+            <span class="info-icon">🌍</span>
+            <div class="info-content">
+              <h4>Region-Aware Pricing</h4>
+              <p>Uses your browser session to get accurate regional prices and availability.</p>
+            </div>
+          </div>
+          
+          <div class="info-item">
+            <span class="info-icon">🛡️</span>
+            <div class="info-content">
+              <h4>Smart Rate Limiting</h4>
+              <p>Intelligent delays and request throttling to avoid detection.</p>
+            </div>
+          </div>
+          
+          <div class="info-item">
+            <span class="info-icon">⚡</span>
+            <div class="info-content">
+              <h4>Bulk Processing</h4>
+              <p>Process up to 1,000 products with real-time progress tracking.</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="info-note">
+          <p><strong>Extension Benefits:</strong> This Chrome extension can access real Amazon data by bypassing browser CORS restrictions, providing accurate pricing and stock information. Your progress is saved automatically!</p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+{
+  "name": "amazon-price-checker-extension",
+  "version": "1.0.0",
+  "description": "Chrome extension for bulk Amazon price and availability checking",
+  "main": "background.js",
+  "scripts": {
+    "dev": "echo 'Chrome extension - Load unpacked in chrome://extensions/ to test'",
+    "build": "echo 'No build process needed for this Chrome extension'",
+    "test": "echo 'No tests configured'"
+  },
+  "keywords": ["chrome-extension", "amazon", "price-checker", "scraping"],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {},
+  "dependencies": {}
+}
